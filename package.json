@@ -7,7 +7,9 @@
   "scripts": {
     "bundle": "paperback bundle",
     "serve": "paperback serve",
-    "test": "paperback test"
+    "test": "paperback test",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src"
   },
   "repository": {
     "type": "git",
