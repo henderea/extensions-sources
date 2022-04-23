@@ -29,7 +29,7 @@ const API = NHENTAI_URL + '/api'
 const method = 'GET'
 
 export const NHentaiInfo: SourceInfo = {
-    version: '3.1.1',
+    version: '3.1.2',
     name: 'nhentai',
     description: 'Extension which pulls 18+ content from nHentai. (Literally all of it. We know why you\'re here)',
     author: 'NotMarek',
