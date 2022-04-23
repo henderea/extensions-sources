@@ -1,6 +1,6 @@
 
 export interface ImagePageObject {
-    t: "j" | "p" | "g" // JPG (≧◡≦)
+    t: 'j' | 'p' | 'g' // JPG (≧◡≦)
     w: number
     h: number
 }
@@ -13,13 +13,13 @@ export interface ImageObject {
 export interface TagObject {
     id: number
     type:
-    | "artist"
-    | "category"
-    | "character"
-    | "groups"
-    | "language"
-    | "parody"
-    | "tag"
+    | 'artist'
+    | 'category'
+    | 'character'
+    | 'groups'
+    | 'language'
+    | 'parody'
+    | 'tag'
     name: string
     url: string
     count: number
@@ -105,5 +105,5 @@ export interface QueryResponse {
 export interface RequestMetadata {
     nextPage?: number
     maxPages?: number
-    sort: "popular-today" | "popular-week" | "popular" | ""
+    sort: 'popular-today' | 'popular-week' | 'popular' | ''
 }
