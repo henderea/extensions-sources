@@ -44,7 +44,7 @@ export const parseGallery = (data: Gallery): Manga => {
     let artist = getArtist(data);
     return createManga({
         id: data.id.toString(),
-        titles: [data.title.english, data.title.japanese, data.title.pretty],
+        titles: [data.title.pretty, data.title.english, data.title.japanese],
         artist,
         author: artist,
         image: `https://t.nhentai.net/galleries/${data.media_id}/cover.${typeOfImage(data.images.cover)}`,
