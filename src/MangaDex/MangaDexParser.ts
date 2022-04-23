@@ -27,8 +27,8 @@ export const parseChapterList = async (chapterObject: any, coversMapping: {[id: 
     const results: MangaTile[] = []
 
     for (const chapter of chapterObject) {
-        const mangaId = chapter.relationships.filter((x: any) => x.type == 'manga').map((x: any) => x.id)[0]
-        const title = chapter.relationships.filter((x: any) => x.type == 'manga').map((x: any) => x.attributes.title.en)[0]
+        const mangaId = chapter.relationships.filter((x: any) => x.type == 'manga' && x.attributes).map((x: any) => x.id)[0]
+        const title = chapter.relationships.filter((x: any) => x.type == 'manga' && x.attributes).map((x: any) => x.attributes.title.en)[0]
         const volume_num = chapter.attributes.volume
         const chapter_num = chapter.attributes.chapter
         const subtitle = `${volume_num ? `Vol. ${volume_num}` : ''} ${chapter_num ? `Ch. ${chapter_num}` : ''}`
