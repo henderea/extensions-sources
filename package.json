@@ -1,6 +1,6 @@
 {
   "name": "extensions-sources",
-  "repositoryName": "Extensions Primary",
+  "repositoryName": "My Primary",
   "version": "1.0.0",
   "description": "Community maintained Paperback extension repository",
   "main": "index.js",
@@ -39,5 +39,6 @@
     "paperback-cli": "^2.0.0-alpha.11",
     "paperback-extensions-common": "^5.0.0-alpha.5",
     "ts-node": "^10.2.1"
-  }
+  },
+  "baseURL": "https://paperback.henderea.com/primary/"
 }
