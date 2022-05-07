@@ -150,7 +150,7 @@ export class MangaDex extends Source {
         }))
     }
 
-    override getMangaShareUrl(mangaId: string): string {
+    override (mangaId: string): string {
         return `${this.MANGADEX_DOMAIN}/title/${mangaId}`
     }
 
@@ -280,8 +280,8 @@ export class MangaDex extends Source {
             }))
         }
 
-        const author = json.data.relationships.filter((x: any) => x.type == 'author').map((x: any) => x.attributes.name).join(', ')
-        const artist = json.data.relationships.filter((x: any) => x.type == 'artist').map((x: any) => x.attributes.name).join(', ')
+        const author = json.data.relationships.filter((x: any) => x.type == 'author').map((x: any) => x.attributes?.name).join(', ')
+        const artist = json.data.relationships.filter((x: any) => x.type == 'artist').map((x: any) => x.attributes?.name).join(', ')
 
         const coverFileName = json.data.relationships.filter((x: any) => x.type == 'cover_art').map((x: any) => x.attributes?.fileName)[0]
         let image: string
@@ -355,7 +355,7 @@ export class MangaDex extends Source {
                 const volume = Number(chapterDetails?.volume)
                 const langCode: any = MDLanguages.getPBCode(chapterDetails.translatedLanguage)
                 const time = new Date(chapterDetails.publishAt)
-                const group = chapter.relationships.filter((x: any) => x.type == 'scanlation_group').map((x: any) => x.attributes.name).join(', ')
+                const group = chapter.relationships.filter((x: any) => x.type == 'scanlation_group').map((x: any) => x.attributes?.name).join(', ')
                 const pages = Number(chapterDetails.pages)
 
                 const identifier = `${volume}-${chapNum}-${chapterDetails.translatedLanguage}`
