@@ -7,10 +7,12 @@ import {
     Chapter,
 } from 'paperback-extensions-common'
 import { NHLanguages } from './NHentaiHelper'
-import { Gallery,
+import {
+    Gallery,
     ImagePageObject,
     QueryResponse,
-    TagObject } from './NHentaiInterfaces'
+    TagObject
+} from './NHentaiInterfaces'
 
 const typeMap: { [key: string]: string } = { 'j': 'jpg', 'p': 'png', 'g': 'gif' }
 

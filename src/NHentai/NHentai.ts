@@ -9,19 +9,24 @@ import {
     SourceInfo,
     TagType,
     Request,
+    Response,
     RequestManager,
     ContentRating,
     Section,
     SourceStateManager
 } from 'paperback-extensions-common'
 import { NHSortOrders } from './NHentaiHelper'
-import { parseChapterDetails,
+import {
+    parseChapterDetails,
     parseGallery,
     parseGalleryIntoChapter,
-    parseSearch } from './NHentaiParser'
-import { getExtraArgs,
+    parseSearch
+} from './NHentaiParser'
+import {
+    getExtraArgs,
     resetSettings,
-    settings } from './NHentaiSettings'
+    settings
+} from './NHentaiSettings'
 
 
 const NHENTAI_URL = 'https://nhentai.net'
@@ -29,7 +34,7 @@ const API = NHENTAI_URL + '/api'
 const method = 'GET'
 
 export const NHentaiInfo: SourceInfo = {
-    version: '3.1.2',
+    version: '3.2.1',
     name: 'nhentai',
     description: 'Extension which pulls 18+ content from nHentai. (Literally all of it. We know why you\'re here)',
     author: 'NotMarek',
@@ -69,6 +74,24 @@ export class NHentai extends Source {
     readonly requestManager: RequestManager = createRequestManager({
         requestsPerSecond: 3,
         requestTimeout: 15000,
+        interceptor: {
+            interceptRequest: async (request: Request): Promise<Request> => {
+
+                request.headers = {
+                    ...(request.headers ?? {}),
+                    ...{
+                        ...({ 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Mobile/15E148 Safari/604.1' }),
+                        'referer': `${NHENTAI_URL}/`
+                    }
+                }
+
+                return request
+            },
+
+            interceptResponse: async (response: Response): Promise<Response> => {
+                return response
+            }
+        }
     });
 
     stateManager = createSourceStateManager({})
