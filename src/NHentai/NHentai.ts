@@ -116,6 +116,7 @@ export class NHentai extends Source {
             method,
         })
         const data = await this.requestManager.schedule(request, 1)
+        this.CloudFlareError(data.status)
         const json_data = (typeof data.data == 'string') ? JSON.parse(data.data) : data.data
         return parseGallery(json_data)
     }
@@ -126,6 +127,7 @@ export class NHentai extends Source {
             method,
         })
         const data = await this.requestManager.schedule(request, 1)
+        this.CloudFlareError(data.status)
         const json_data = (typeof data.data == 'string') ? JSON.parse(data.data) : data.data
         return [parseGalleryIntoChapter(json_data, mangaId)]
     }
@@ -136,6 +138,7 @@ export class NHentai extends Source {
             method
         })
         const data = await this.requestManager.schedule(request, 1)
+        this.CloudFlareError(data.status)
         const json_data = (typeof data.data == 'string') ? JSON.parse(data.data) : data.data
         return parseChapterDetails(json_data, mangaId)
 
@@ -158,12 +161,8 @@ export class NHentai extends Source {
                 method
             })
             const data = await this.requestManager.schedule(request, 1)
-            let json_data
-            try {
-                json_data = (typeof data.data == 'string') ? JSON.parse(data.data) : data.data
-            } catch {
-                throw new Error('Source requires cloudflare bypass. If you have already done this and still get errors, create a support thread in the discord.')
-            }
+            this.CloudFlareError(data.status)
+            const json_data = (typeof data.data == 'string') ? JSON.parse(data.data) : data.data
             return createPagedResults({
                 results: parseSearch({ result: [json_data],  num_pages: 1, per_page: 1}),
                 metadata: {
@@ -179,12 +178,8 @@ export class NHentai extends Source {
                 method
             })
             const data = await this.requestManager.schedule(request, 1)
-            let json_data
-            try {
-                json_data = (typeof data.data == 'string') ? JSON.parse(data.data) : data.data
-            } catch {
-                throw new Error('Source requires cloudflare bypass. If you have already done this and still get errors, create a support thread in the discord.')
-            }
+            this.CloudFlareError(data.status)
+            const json_data = (typeof data.data == 'string') ? JSON.parse(data.data) : data.data
             return createPagedResults({
                 results: parseSearch(json_data),
                 metadata: {
@@ -209,12 +204,9 @@ export class NHentai extends Source {
                 method
             })
             const data = await this.requestManager.schedule(request, 1)
-            try {
-                const json_data = (typeof data.data == 'string') ? JSON.parse(data.data) : data.data
-                section.items = parseSearch(json_data)
-            } catch {
-                throw new Error('Source requires cloudflare bypass. If you have already done this and still get errors, create a support thread in the discord.')
-            }
+            this.CloudFlareError(data.status)
+            const json_data = (typeof data.data == 'string') ? JSON.parse(data.data) : data.data
+            section.items = parseSearch(json_data)
             sectionCallback(section)
         }
     }
@@ -226,12 +218,8 @@ export class NHentai extends Source {
             method
         })
         const data = await this.requestManager.schedule(request, 1)
-        let json_data
-        try {
-            json_data = (typeof data.data == 'string') ? JSON.parse(data.data) : data.data
-        } catch {
-            throw new Error('Source requires cloudflare bypass. If you have already done this and still get errors, create a support thread in the discord.')
-        }
+        this.CloudFlareError(data.status)
+        const json_data = (typeof data.data == 'string') ? JSON.parse(data.data) : data.data
         page++
         return createPagedResults({
             results: parseSearch(json_data),
@@ -245,5 +233,11 @@ export class NHentai extends Source {
             url: NHENTAI_URL,
             method: 'GET'
         })
+    }
+
+    CloudFlareError(status: number): void {
+        if (status == 503) {
+            throw new Error('CLOUDFLARE BYPASS ERROR:\nPlease go to Settings > Sources > <The name of this source> and press Cloudflare Bypass')
+        }
     }
 }
