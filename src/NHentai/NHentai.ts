@@ -34,7 +34,7 @@ const API = NHENTAI_URL + '/api'
 const method = 'GET'
 
 export const NHentaiInfo: SourceInfo = {
-    version: '3.2.2',
+    version: '3.2.3',
     name: 'nhentai',
     description: 'Extension which pulls 18+ content from nHentai. (Literally all of it. We know why you\'re here)',
     author: 'NotMarek',
@@ -70,6 +70,8 @@ const extraArgs = async (stateManager: SourceStateManager): Promise<string> => {
     return ` ${args}` 
 }
 
+const userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Mobile/15E148 Safari/604.1'
+
 export class NHentai extends Source {
     readonly requestManager: RequestManager = createRequestManager({
         requestsPerSecond: 3,
@@ -80,7 +82,7 @@ export class NHentai extends Source {
                 request.headers = {
                     ...(request.headers ?? {}),
                     ...{
-                        ...({ 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Mobile/15E148 Safari/604.1' }),
+                        ...({ 'user-agent': userAgent }),
                         'referer': `${NHENTAI_URL}/`
                     }
                 }
@@ -231,7 +233,11 @@ export class NHentai extends Source {
     override getCloudflareBypassRequest(): Request {
         return createRequestObject({
             url: NHENTAI_URL,
-            method: 'GET'
+            method: 'GET',
+            headers: {
+                'user-agent': userAgent,
+                'referer': `${NHENTAI_URL}.`
+            }
         })
     }
 
