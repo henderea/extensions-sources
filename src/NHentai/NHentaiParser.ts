@@ -75,7 +75,7 @@ export const parseChapterDetails = (data: Gallery, mangaId: string): ChapterDeta
 
 export const parseSearch = (data: QueryResponse): MangaTile[] => {
     const tiles: MangaTile[] = []
-    if(data) {
+    if(data && data.result) {
         for (const gallery of data.result) {
             tiles.push(createMangaTile({
                 id: gallery.id.toString(),
