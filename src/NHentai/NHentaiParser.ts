@@ -75,17 +75,19 @@ export const parseChapterDetails = (data: Gallery, mangaId: string): ChapterDeta
 
 export const parseSearch = (data: QueryResponse): MangaTile[] => {
     const tiles: MangaTile[] = []
-    for (const gallery of data.result) {
-        tiles.push(createMangaTile({
-            id: gallery.id.toString(),
-            image: `https://t.nhentai.net/galleries/${gallery.media_id}/cover.${typeOfImage(gallery.images.cover)}`,
-            subtitleText: createIconText({
-                text: NHLanguages.getName(getLanguage(gallery))
-            }),
-            title: createIconText({
-                text: gallery.title.pretty
-            })
-        }))
+    if(data) {
+        for (const gallery of data.result) {
+            tiles.push(createMangaTile({
+                id: gallery.id.toString(),
+                image: `https://t.nhentai.net/galleries/${gallery.media_id}/cover.${typeOfImage(gallery.images.cover)}`,
+                subtitleText: createIconText({
+                    text: NHLanguages.getName(getLanguage(gallery))
+                }),
+                title: createIconText({
+                    text: gallery.title.pretty
+                })
+            }))
+        }
     }
     return tiles
 }
