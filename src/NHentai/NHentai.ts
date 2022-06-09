@@ -34,7 +34,7 @@ const API = NHENTAI_URL + '/api'
 const method = 'GET'
 
 export const NHentaiInfo: SourceInfo = {
-    version: '3.2.3',
+    version: '3.2.3.1',
     name: 'nhentai',
     description: 'Extension which pulls 18+ content from nHentai. (Literally all of it. We know why you\'re here)',
     author: 'NotMarek',
@@ -48,7 +48,7 @@ export const NHentaiInfo: SourceInfo = {
 const language = async (stateManager: SourceStateManager): Promise<string> => {
     const lang = (await stateManager.retrieve('languages') as string) ?? ''
     if (lang.length === 0) {
-        return '""'
+        return ''
     }
     else {
         return `language:${lang}`
@@ -65,9 +65,10 @@ const sortOrder = async (query: string, stateManager: SourceStateManager): Promi
     }
 }
 
-const extraArgs = async (stateManager: SourceStateManager): Promise<string> => {
-    const args = await getExtraArgs(stateManager)
-    return ` ${args}` 
+const combineSearch = (...parts: string[]): string => parts.map(p => (p ?? '').trim()).filter(p => p && p.length > 0).join(' ')
+
+const makeSearch = async(stateManager: SourceStateManager, query = ''): Promise<string> => {
+    return combineSearch(query, await getExtraArgs(stateManager), await language(stateManager))
 }
 
 const userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Mobile/15E148 Safari/604.1'
@@ -173,7 +174,7 @@ export class NHentai extends Source {
                 }
             })
         } else {
-            const q: string = title + ' ' + await language(this.stateManager) + await extraArgs(this.stateManager)
+            const q: string = await makeSearch(this.stateManager, title)
             const [sort, query]: string[] = await sortOrder(q, this.stateManager) ?? ['', q]
             const request = createRequestObject({
                 url: `${API}/galleries/search?query=${encodeURIComponent(query ?? '')}&sort=${sort}&page=${page}`,
@@ -202,7 +203,7 @@ export class NHentai extends Source {
         for (const section of sections) {
             sectionCallback(section)
             const request = createRequestObject({
-                url: `${API}/galleries/search?query=${encodeURIComponent(await language(this.stateManager) + await extraArgs(this.stateManager))}&sort=${section.id}`,
+                url: `${API}/galleries/search?query=${encodeURIComponent(await makeSearch(this.stateManager))}&sort=${section.id}`,
                 method
             })
             const data = await this.requestManager.schedule(request, 1)
@@ -216,7 +217,7 @@ export class NHentai extends Source {
     override async getViewMoreItems(homepageSectionId: string, metadata: {page: number} | null | undefined): Promise<PagedResults> {
         let page: number = metadata?.page ?? 1
         const request = createRequestObject({
-            url: `${API}/galleries/search?query=${encodeURIComponent(await language(this.stateManager) + await extraArgs(this.stateManager))}&sort=${homepageSectionId}&page=${page}`,
+            url: `${API}/galleries/search?query=${encodeURIComponent(await makeSearch(this.stateManager))}&sort=${homepageSectionId}&page=${page}`,
             method
         })
         const data = await this.requestManager.schedule(request, 1)
