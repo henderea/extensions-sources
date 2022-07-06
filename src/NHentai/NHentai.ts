@@ -34,7 +34,7 @@ const API = NHENTAI_URL + '/api'
 const method = 'GET'
 
 export const NHentaiInfo: SourceInfo = {
-    version: '3.2.3',
+    version: '3.2.4',
     name: 'nhentai',
     description: 'Extension which pulls 18+ content from nHentai. (Literally all of it. We know why you\'re here)',
     author: 'NotMarek',
@@ -47,7 +47,7 @@ export const NHentaiInfo: SourceInfo = {
 
 const language = async (stateManager: SourceStateManager): Promise<string> => {
     const lang = (await stateManager.retrieve('languages') as string) ?? ''
-    if (lang.length === 0) {
+    if (lang == '') {
         return '""'
     }
     else {
@@ -70,7 +70,7 @@ const extraArgs = async (stateManager: SourceStateManager): Promise<string> => {
     return ` ${args}` 
 }
 
-const userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Mobile/15E148 Safari/604.1'
+const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 12_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15'
 
 export class NHentai extends Source {
     readonly requestManager: RequestManager = createRequestManager({
