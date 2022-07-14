@@ -159,7 +159,19 @@ export const parseAccessToken = async (accessToken: string | undefined): Promise
     return JSON.parse(tokenBodyJSON)
 }
 
-export const authEndpointRequest = async (requestManager: RequestManager, endpoint: 'login' | 'refresh' | 'logout', payload: any): Promise<any | undefined> => {
+const authRequestCache: Record<string, Promise<any | undefined>> = {}
+
+export const authEndpointRequest = (requestManager: RequestManager, endpoint: 'login' | 'refresh' | 'logout', payload: any): Promise<any | undefined> => {
+    let request = authRequestCache[endpoint]
+    if (request == undefined) {
+        request = _authEndpointRequest(requestManager, endpoint, payload).finally(() => { delete authRequestCache[endpoint] })
+        authRequestCache[endpoint] = request
+    }
+
+    return request
+}
+
+const _authEndpointRequest = async (requestManager: RequestManager, endpoint: 'login' | 'refresh' | 'logout', payload: any): Promise<any | undefined> => {
     const response = await requestManager.schedule(createRequestObject({
         method: 'POST',
         url: 'https://api.mangadex.org/auth/' + endpoint,
