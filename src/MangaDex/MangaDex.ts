@@ -31,6 +31,7 @@ import {
     getSearchThumbnail,
     getMangaThumbnail,
     resetSettings,
+    getDaysToLookBack,
     getDataSaver,
     getSkipSameChapter,
     homepageSettings,
@@ -70,7 +71,7 @@ export const MangaDexInfo: SourceInfo = {
     description: 'Extension that pulls manga from MangaDex',
     icon: 'icon.png',
     name: 'MangaDex',
-    version: '2.1.12',
+    version: '2.1.13',
     authorWebsite: 'https://github.com/nar1n',
     websiteBaseURL: MANGADEX_DOMAIN,
     contentRating: ContentRating.EVERYONE,
@@ -719,7 +720,13 @@ export class MangaDex extends Source {
         const maxRequests = 100
         let loadNextPage = true
         const updatedManga: string[] = []
-        const updatedAt = time.toISOString().split('.')[0] // They support a weirdly truncated version of an ISO timestamp
+        const adjustedTime = new Date()
+        const daysToLookBack = await getDaysToLookBack(this.stateManager)
+        adjustedTime.setTime(time.getTime() - (daysToLookBack * 60 * 60 * 1000))
+        const updatedAt = adjustedTime.toISOString().split('.')[0] // They support a weirdly truncated version of an ISO timestamp
+        // const adjustedUpdatedAt = adjustedTime.toISOString().split('.')[0] // They support a weirdly truncated version of an ISO timestamp
+        console.log('Adjusted updatedAt: ' + updatedAt)
+        // console.log('Adjusted updatedAt: ' + adjustedUpdatedAt)
         const languages: string[] = await getLanguages(this.stateManager)
 
         while (loadNextPage) {
@@ -740,6 +747,7 @@ export class MangaDex extends Source {
 
             // If we have no content, there are no updates available
             if(response.status == 204) {
+                console.log('Response was 204')
                 return
             }
 
@@ -766,6 +774,7 @@ export class MangaDex extends Source {
                 loadNextPage = false
             }
             if (mangaToUpdate.length > 0) {
+                console.log('Manga to update: ' + mangaToUpdate.length)
                 mangaUpdatesFoundCallback(createMangaUpdates({
                     ids: mangaToUpdate
                 }))

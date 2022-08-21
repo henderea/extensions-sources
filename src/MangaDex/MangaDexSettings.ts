@@ -33,6 +33,10 @@ export const getSkipSameChapter = async (stateManager: SourceStateManager): Prom
     return (await stateManager.retrieve('skip_same_chapter') as boolean) ?? false
 }
 
+export const getDaysToLookBack = async (stateManager: SourceStateManager): Promise<number> => {
+    return Math.max(parseFloat((await stateManager.retrieve('days_to_look_back') as string) ?? '0'), 0)
+}
+
 export const contentSettings = (stateManager: SourceStateManager): NavigationButton => {
     return createNavigationButton({
         id: 'content_settings',
@@ -44,7 +48,8 @@ export const contentSettings = (stateManager: SourceStateManager): NavigationBut
                     stateManager.store('languages', values.languages),
                     stateManager.store('ratings', values.ratings),
                     stateManager.store('data_saver', values.data_saver),
-                    stateManager.store('skip_same_chapter', values.skip_same_chapter)
+                    stateManager.store('skip_same_chapter', values.skip_same_chapter),
+                    stateManager.store('days_to_look_back', values.days_to_look_back)
                 ]).then()
             },
             validate: () => {
@@ -60,7 +65,8 @@ export const contentSettings = (stateManager: SourceStateManager): NavigationBut
                                 getLanguages(stateManager),
                                 getRatings(stateManager),
                                 getDataSaver(stateManager),
-                                getSkipSameChapter(stateManager)
+                                getSkipSameChapter(stateManager),
+                                getDaysToLookBack(stateManager)
                             ]).then(async values => {
                                 return [
                                     createSelect({
@@ -80,6 +86,12 @@ export const contentSettings = (stateManager: SourceStateManager): NavigationBut
                                         value: values[1],
                                         allowsMultiselect: true,
                                         minimumOptionCount: 1
+                                    }),
+                                    createInputField({
+                                        id: 'days_to_look_back',
+                                        placeholder: 'Days to look back during update',
+                                        value: values[4] + '',
+                                        maskInput: false
                                     }),
                                     createSwitch({
                                         id: 'data_saver',
