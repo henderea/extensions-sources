@@ -71,7 +71,7 @@ export const MangaDexInfo: SourceInfo = {
     description: 'Extension that pulls manga from MangaDex',
     icon: 'icon.png',
     name: 'MangaDex',
-    version: '2.1.14',
+    version: '2.1.15',
     authorWebsite: 'https://github.com/nar1n',
     websiteBaseURL: MANGADEX_DOMAIN,
     contentRating: ContentRating.EVERYONE,
@@ -151,7 +151,7 @@ export class MangaDex extends Source {
         }))
     }
 
-    override (mangaId: string): string {
+    override getMangaShareUrl(mangaId: string): string {
         return `${this.MANGADEX_DOMAIN}/title/${mangaId}`
     }
 
