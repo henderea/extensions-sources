@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "yarn bundle"
+yarn bundle
 name="${1:-$(git rev-parse --abbrev-ref HEAD)}"
 echo "sudo rm -rf '/home/henderea/domains/paperback/${name}'"
 sudo rm -rf "/home/henderea/domains/paperback/${name}"
