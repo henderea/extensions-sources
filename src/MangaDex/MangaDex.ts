@@ -71,7 +71,7 @@ export const MangaDexInfo: SourceInfo = {
     description: 'Extension that pulls manga from MangaDex',
     icon: 'icon.png',
     name: 'MangaDex',
-    version: '2.1.15',
+    version: '2.1.16',
     authorWebsite: 'https://github.com/nar1n',
     websiteBaseURL: MANGADEX_DOMAIN,
     contentRating: ContentRating.EVERYONE,
@@ -344,11 +344,12 @@ export class MangaDex extends Source {
             })
             const response = await this.requestManager.schedule(request, 1)
             const json = (typeof response.data) === 'string' ? JSON.parse(response.data) : response.data
+            if(sortingIndex == 0 && json.total > 0) {
+                sortingIndex = json.total
+            }
             offset += 500
 
             if(json.data === undefined) throw new Error(`Failed to parse json results for ${mangaId}`)
-
-            sortingIndex = json.data.length
 
             for (const chapter of json.data) {
                 const chapterId = chapter.id
