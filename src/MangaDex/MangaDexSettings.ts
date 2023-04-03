@@ -1,6 +1,6 @@
-import { Button,
-    FormRow,
-    NavigationButton,
+import { DUIButton,
+    DUIFormRow,
+    DUINavigationButton,
     RequestManager,
     SourceStateManager } from '@paperback/types'
 import { MDLanguages,
@@ -25,12 +25,11 @@ export const getSkipSameChapter = async (stateManager: SourceStateManager): Prom
 export const getDaysToLookBack = async (stateManager: SourceStateManager): Promise<number> => {
     return Math.max(parseFloat((await stateManager.retrieve('days_to_look_back') as string) ?? '0'), 0)
 }
-export const contentSettings = (stateManager: SourceStateManager): NavigationButton => {
-    return App.createNavigationButton({
+export const contentSettings = (stateManager: SourceStateManager): DUINavigationButton => {
+    return App.createDUINavigationButton({
         id: 'content_settings',
-        value: '',
         label: 'Content Settings',
-        form: App.createForm({
+        form: App.createDUIForm({
             onSubmit: (values: any) => {
                 return Promise.all([
                     stateManager.store('languages', values.languages),
@@ -40,59 +39,56 @@ export const contentSettings = (stateManager: SourceStateManager): NavigationBut
                     stateManager.store('days_to_look_back', values.days_to_look_back)
                 ]).then()
             },
-            validate: () => {
-                return Promise.resolve(true)
-            },
             sections: () => {
                 return Promise.resolve([
-                    App.createSection({
+                    App.createDUISection({
                         id: 'content',
                         footer: 'When enabled, same chapters from different scanlation group will not be shown.',
-                        rows: () => {
-                            return Promise.all([
-                                getLanguages(stateManager),
-                                getRatings(stateManager),
-                                getDataSaver(stateManager),
-                                getSkipSameChapter(stateManager),
-                                getDaysToLookBack(stateManager)
-                            ]).then(async (values) => {
-                                return [
-                                    App.createSelect({
-                                        id: 'languages',
-                                        label: 'Languages',
-                                        options: MDLanguages.getMDCodeList(),
-                                        displayLabel: option => MDLanguages.getName(option),
-                                        value: values[0],
-                                        allowsMultiselect: true,
-                                        minimumOptionCount: 1
+                        isHidden: false,
+                        rows: async () => {
+                            return [
+                                App.createDUISelect({
+                                    id: 'languages',
+                                    label: 'Languages',
+                                    options: MDLanguages.getMDCodeList(),
+                                    labelResolver:  async option => MDLanguages.getName(option),
+                                    value: App.createDUIBinding({
+                                        get: async () => await getLanguages(stateManager)
                                     }),
-                                    App.createSelect({
-                                        id: 'ratings',
-                                        label: 'Content Rating',
-                                        options: MDRatings.getEnumList(),
-                                        displayLabel: option => MDRatings.getName(option),
-                                        value: values[1],
-                                        allowsMultiselect: true,
-                                        minimumOptionCount: 1
+                                    allowsMultiselect: true
+                                }),
+                                App.createDUISelect({
+                                    id: 'ratings',
+                                    label: 'Content Rating',
+                                    options: MDRatings.getEnumList(),
+                                    labelResolver: async option => MDRatings.getName(option),
+                                    value: App.createDUIBinding({
+                                        get: async () => await getRatings(stateManager)
                                     }),
-                                    App.createInputField({
-                                        id: 'days_to_look_back',
-                                        placeholder: 'Days to look back during update',
-                                        value: values[4] + '',
-                                        maskInput: false
-                                    }),
-                                    App.createSwitch({
-                                        id: 'data_saver',
-                                        label: 'Data Saver',
-                                        value: values[2]
-                                    }),
-                                    App.createSwitch({
-                                        id: 'skip_same_chapter',
-                                        label: 'Skip Same Chapter',
-                                        value: values[3]
+                                    allowsMultiselect: true
+                                }),
+                                App.createDUIInputField({
+                                    id: 'days_to_look_back',
+                                    label: 'Days to look back during update',
+                                    value: App.createDUIBinding({
+                                        get: async () => await getDaysToLookBack(stateManager)
                                     })
-                                ]
-                            })
+                                }),
+                                App.createDUISwitch({
+                                    id: 'data_saver',
+                                    label: 'Data Saver',
+                                    value: App.createDUIBinding({
+                                        get: async () => await getDataSaver(stateManager)
+                                    })
+                                }),
+                                App.createDUISwitch({
+                                    id: 'skip_same_chapter',
+                                    label: 'Skip Same Chapter',
+                                    value: App.createDUIBinding({
+                                        get: async () => await getSkipSameChapter(stateManager)
+                                    })
+                                })
+                            ]
                         }
                     })
                 ])
@@ -177,14 +173,13 @@ const _authEndpointRequest = async (requestManager: RequestManager, endpoint: 'l
     }
     return jsonData
 }
-export const accountSettings = async (stateManager: SourceStateManager, requestManager: RequestManager): Promise<FormRow> => {
+export const accountSettings = async (stateManager: SourceStateManager, requestManager: RequestManager): Promise<DUIFormRow> => {
     const accessToken = await getAccessToken(stateManager)
     if (!accessToken) {
-        return App.createNavigationButton({
+        return App.createDUINavigationButton({
             id: 'login_button',
             label: 'Login',
-            value: undefined,
-            form: App.createForm({
+            form: App.createDUIForm({
                 onSubmit: async (values) => {
                     if (!values.username) {
                         throw new Error('Username must not be empty')
@@ -198,31 +193,34 @@ export const accountSettings = async (stateManager: SourceStateManager, requestM
                     })
                     await saveAccessToken(stateManager, response.token.session, response.token.refresh)
                 },
-                validate: async () => true,
                 sections: async () => [
-                    App.createSection({
+                    App.createDUISection({
                         id: 'username_section',
                         header: 'Username',
                         footer: 'Enter your MangaDex account username',
+                        isHidden: false,
                         rows: async () => [
-                            App.createInputField({
+                            App.createDUIInputField({
                                 id: 'username',
-                                placeholder: 'Username',
-                                value: '',
-                                maskInput: false
+                                label: 'Username',
+                                value: App.createDUIBinding({
+                                    get: async () => ''
+                                })
                             })
                         ]
                     }),
-                    App.createSection({
+                    App.createDUISection({
                         id: 'password_section',
                         header: 'Password',
                         footer: 'Enter the password associated with your MangaDex account Username',
+                        isHidden: false,
                         rows: async () => [
-                            App.createInputField({
+                            App.createDUISecureInputField({
                                 id: 'password',
-                                placeholder: 'Password',
-                                value: '',
-                                maskInput: true
+                                label: 'Password',
+                                value: App.createDUIBinding({
+                                    get: async () => ''
+                                })
                             })
                         ]
                     })
@@ -230,21 +228,20 @@ export const accountSettings = async (stateManager: SourceStateManager, requestM
             })
         })
     }
-    return App.createNavigationButton({
+    return App.createDUINavigationButton({
         id: 'account_settings',
-        value: undefined,
         label: 'Session Info',
-        form: App.createForm({
+        form: App.createDUIForm({
             onSubmit: async () => undefined,
-            validate: async () => true,
             sections: async () => {
                 const accessToken = await getAccessToken(stateManager)
                 if (!accessToken) {
                     return [
-                        App.createSection({
+                        App.createDUISection({
                             id: 'not_logged_in_section',
+                            isHidden: false,
                             rows: async () => [
-                                App.createLabel({
+                                App.createDUILabel({
                                     id: 'not_logged_in',
                                     label: 'Not Logged In',
                                     value: undefined
@@ -254,12 +251,13 @@ export const accountSettings = async (stateManager: SourceStateManager, requestM
                     ]
                 }
                 return [
-                    App.createSection({
+                    App.createDUISection({
                         id: 'introspect',
+                        isHidden: false,
                         rows: async () => {
                             return Object.keys(accessToken.tokenBody).map(key => {
                                 const value = accessToken.tokenBody[key]
-                                return App.createMultilineLabel({
+                                return App.createDUIMultilineLabel({
                                     id: key,
                                     label: key,
                                     value: Array.isArray(value) ? value.join('\n') : `${value}`
@@ -267,13 +265,13 @@ export const accountSettings = async (stateManager: SourceStateManager, requestM
                             })
                         }
                     }),
-                    App.createSection({
+                    App.createDUISection({
                         id: 'refresh_button_section',
+                        isHidden: false,
                         rows: async () => [
-                            App.createButton({
+                            App.createDUIButton({
                                 id: 'refresh_token_button',
                                 label: 'Refresh Token',
-                                value: undefined,
                                 onTap: async () => {
                                     const response = await authEndpointRequest(requestManager, 'refresh', {
                                         token: accessToken.refreshToken
@@ -281,10 +279,9 @@ export const accountSettings = async (stateManager: SourceStateManager, requestM
                                     await saveAccessToken(stateManager, response.token.session, response.token.refresh)
                                 }
                             }),
-                            App.createButton({
+                            App.createDUIButton({
                                 id: 'logout_button',
                                 label: 'Logout',
-                                value: undefined,
                                 onTap: async () => {
                                     await authEndpointRequest(requestManager, 'logout', {})
                                     await saveAccessToken(stateManager, undefined, undefined)
@@ -297,12 +294,11 @@ export const accountSettings = async (stateManager: SourceStateManager, requestM
         })
     })
 }
-export const thumbnailSettings = (stateManager: SourceStateManager): NavigationButton => {
-    return App.createNavigationButton({
+export const thumbnailSettings = (stateManager: SourceStateManager): DUINavigationButton => {
+    return App.createDUINavigationButton({
         id: 'thumbnail_settings',
-        value: '',
         label: 'Thumbnail Quality',
-        form: App.createForm({
+        form: App.createDUIForm({
             onSubmit: (values: any) => {
                 return Promise.all([
                     stateManager.store('homepage_thumbnail', values.homepage_thumbnail[0]),
@@ -310,49 +306,44 @@ export const thumbnailSettings = (stateManager: SourceStateManager): NavigationB
                     stateManager.store('manga_thumbnail', values.manga_thumbnail[0]),
                 ]).then()
             },
-            validate: () => {
-                return Promise.resolve(true)
-            },
             sections: () => {
                 return Promise.resolve([
-                    App.createSection({
+                    App.createDUISection({
                         id: 'thumbnail',
-                        rows: () => {
-                            return Promise.all([
-                                getHomepageThumbnail(stateManager),
-                                getSearchThumbnail(stateManager),
-                                getMangaThumbnail(stateManager)
-                            ]).then(async (values) => {
-                                return [
-                                    App.createSelect({
-                                        id: 'homepage_thumbnail',
-                                        label: 'Homepage Thumbnail',
-                                        options: MDImageQuality.getEnumList(),
-                                        displayLabel: option => MDImageQuality.getName(option),
-                                        value: [values[0]],
-                                        allowsMultiselect: false,
-                                        minimumOptionCount: 1
+                        isHidden: false,
+                        rows: async () => {
+                            return [
+                                App.createDUISelect({
+                                    id: 'homepage_thumbnail',
+                                    label: 'Homepage Thumbnail',
+                                    options: MDImageQuality.getEnumList(),
+                                    labelResolver: async option => MDImageQuality.getName(option),
+                                    value: App.createDUIBinding({
+                                        get: async () => [await getHomepageThumbnail(stateManager)]
                                     }),
-                                    App.createSelect({
-                                        id: 'search_thumbnail',
-                                        label: 'Search Thumbnail',
-                                        options: MDImageQuality.getEnumList(),
-                                        displayLabel: option => MDImageQuality.getName(option),
-                                        value: [values[1]],
-                                        allowsMultiselect: false,
-                                        minimumOptionCount: 1
+                                    allowsMultiselect: false
+                                }),
+                                App.createDUISelect({
+                                    id: 'search_thumbnail',
+                                    label: 'Search Thumbnail',
+                                    options: MDImageQuality.getEnumList(),
+                                    labelResolver: async option => MDImageQuality.getName(option),
+                                    value: App.createDUIBinding({
+                                        get: async () => [await getSearchThumbnail(stateManager)]
                                     }),
-                                    App.createSelect({
-                                        id: 'manga_thumbnail',
-                                        label: 'Manga Thumbnail',
-                                        options: MDImageQuality.getEnumList(),
-                                        displayLabel: option => MDImageQuality.getName(option),
-                                        value: [values[2]],
-                                        allowsMultiselect: false,
-                                        minimumOptionCount: 1
-                                    })
-                                ]
-                            })
+                                    allowsMultiselect: false,
+                                }),
+                                App.createDUISelect({
+                                    id: 'manga_thumbnail',
+                                    label: 'Manga Thumbnail',
+                                    options: MDImageQuality.getEnumList(),
+                                    labelResolver: async option => MDImageQuality.getName(option),
+                                    value: App.createDUIBinding({
+                                        get: async () => [await getMangaThumbnail(stateManager)]
+                                    }),
+                                    allowsMultiselect: false,
+                                })
+                            ]
                         }
                     })
                 ])
@@ -360,11 +351,10 @@ export const thumbnailSettings = (stateManager: SourceStateManager): NavigationB
         })
     })
 }
-export const resetSettings = (stateManager: SourceStateManager): Button => {
-    return App.createButton({
+export const resetSettings = (stateManager: SourceStateManager): DUIButton => {
+    return App.createDUIButton({
         id: 'reset',
         label: 'Reset to Default',
-        value: '',
         onTap: () => {
             return Promise.all([
                 stateManager.store('languages', null),
@@ -392,12 +382,11 @@ export const getEnabledRecommendations = async (stateManager: SourceStateManager
 export const getAmountRecommendations = async (stateManager: SourceStateManager): Promise<number> => {
     return (await stateManager.retrieve('amount_of_recommendations') as number) ?? 5
 }
-export const homepageSettings = (stateManager: SourceStateManager): NavigationButton => {
-    return App.createNavigationButton({
+export const homepageSettings = (stateManager: SourceStateManager): DUINavigationButton => {
+    return App.createDUINavigationButton({
         id: 'homepage_settings',
-        value: '',
         label: 'Homepage Settings',
-        form: App.createForm({
+        form: App.createDUIForm({
             onSubmit: (values: any) => {
                 return Promise.all([
                     stateManager.store('enabled_homepage_sections', values.enabled_homepage_sections),
@@ -408,69 +397,61 @@ export const homepageSettings = (stateManager: SourceStateManager): NavigationBu
                     sliceRecommendedIds(stateManager, values.amount_of_recommendations),
                 ]).then()
             },
-            validate: () => {
-                return Promise.resolve(true)
-            },
             sections: () => {
                 return Promise.resolve([
-                    App.createSection({
+                    App.createDUISection({
                         id: 'homepage_sections_section',
                         //footer: 'Which sections should be shown on the homepage',
-                        rows: () => {
-                            return Promise.all([
-                                getEnabledHomePageSections(stateManager),
-                            ]).then(async (values) => {
-                                return [
-                                    App.createSelect({
-                                        id: 'enabled_homepage_sections',
-                                        label: 'Homepage sections',
-                                        options: MDHomepageSections.getEnumList(),
-                                        displayLabel: option => MDHomepageSections.getName(option),
-                                        value: values[0] ?? [],
-                                        allowsMultiselect: true,
-                                        minimumOptionCount: 0
+                        isHidden: false,
+                        rows: async () => {
+                            return [
+                                App.createDUISelect({
+                                    id: 'enabled_homepage_sections',
+                                    label: 'Homepage sections',
+                                    options: MDHomepageSections.getEnumList(),
+                                    labelResolver: async option => MDHomepageSections.getName(option),
+                                    value: App.createDUIBinding({
+                                        get: async () => await getEnabledHomePageSections(stateManager) ?? []
                                     }),
-                                ]
-                            })
+                                    allowsMultiselect: true
+                                }),
+                            ]
                         }
                     }),
-                    App.createSection({
+                    App.createDUISection({
                         id: 'recommendations_settings_section',
                         header: 'Titles recommendations',
                         footer: 'Recommendation are based on recently read chapters and shown on the homepage',
-                        rows: () => {
-                            return Promise.all([
-                                getEnabledRecommendations(stateManager),
-                                getAmountRecommendations(stateManager),
-                                // Can be used to debug recommended ids
-                                //getRecommendedIds(stateManager)
-                            ]).then(async (values) => {
-                                return [
-                                    App.createSwitch({
-                                        id: 'enabled_recommendations',
-                                        label: 'Enable recommendations',
-                                        value: values[0] ?? false
-                                    }),
-                                    App.createStepper({
-                                        id: 'amount_of_recommendations',
-                                        label: 'Amount of recommendation',
-                                        value: values[1] ?? 5,
-                                        min: 1,
-                                        max: 15,
-                                        step: 1
-                                    }),
-                                    App.createButton({
-                                        id: 'reset_recommended_ids',
-                                        label: 'Reset recommended titles',
-                                        value: '',
-                                        onTap: () => {
-                                            return Promise.all([
-                                                stateManager.store('recommendedIds', null),
-                                            ]).then()
-                                        }
+                        isHidden: false,
+                        rows: async () => {
+                            return [
+                                App.createDUISwitch({
+                                    id: 'enabled_recommendations',
+                                    label: 'Enable recommendations',
+                                    value: App.createDUIBinding({
+                                        get: async () => await getEnabledRecommendations(stateManager) ?? false
                                     })
-                                ]
-                            })
+                                }),
+                                App.createDUIStepper({
+                                    id: 'amount_of_recommendations',
+                                    label: 'Amount of recommendation',
+                                    value: App.createDUIBinding({
+                                        get: async () => await getAmountRecommendations(stateManager) ?? 5
+                                    }),
+                                    min: 1,
+                                    max: 15,
+                                    step: 1
+                                }),
+                                App.createDUIButton({
+                                    id: 'reset_recommended_ids',
+                                    label: 'Reset recommended titles',
+                                    onTap: () => {
+                                        return Promise.all([
+                                            stateManager.store('recommendedIds', null),
+                                        ]).then()
+                                    }
+                                })
+                            ]
                         }
                     }),
                 ])
