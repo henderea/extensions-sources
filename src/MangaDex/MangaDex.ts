@@ -16,7 +16,8 @@ import { PagedResults,
     MangaUpdates,
     Searchable,
     MangaProviding,
-    ChapterProviding } from '@paperback/types'
+    ChapterProviding,
+    SourceIntents } from '@paperback/types'
 import entities from 'entities'
 import { contentSettings,
     getLanguages,
@@ -56,7 +57,7 @@ export const MangaDexInfo: SourceInfo = {
     description: 'Extension that pulls manga from MangaDex',
     icon: 'icon.png',
     name: 'MangaDex',
-    version: '2.1.16',
+    version: '2.1.17',
     authorWebsite: 'https://github.com/nar1n',
     websiteBaseURL: MANGADEX_DOMAIN,
     contentRating: ContentRating.EVERYONE,
@@ -69,7 +70,8 @@ export const MangaDexInfo: SourceInfo = {
             text: 'Notifications',
             type: BadgeColor.GREEN
         }
-    ]
+    ],
+    intents: SourceIntents.HOMEPAGE_SECTIONS | SourceIntents.MANGA_CHAPTERS | SourceIntents.SETTINGS_UI
 }
 export class MangaDex implements Searchable, MangaProviding, ChapterProviding {
     MANGADEX_DOMAIN = MANGADEX_DOMAIN;
