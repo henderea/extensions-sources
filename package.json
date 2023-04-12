@@ -29,7 +29,8 @@
   },
   "dependencies": {
     "paperback-cli": "^1.4.0",
-    "paperback-extensions-common": "^5.0.0-alpha.7"
+    "paperback-extensions-common": "^5.0.0-alpha.7",
+    "random-useragent": "^0.5.0"
   },
   "baseURL": "https://paperback.henderea.com/hentai/"
 }
