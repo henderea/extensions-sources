@@ -84,7 +84,7 @@ export class NHentai extends Source {
                 request.headers = {
                     ...(request.headers ?? {}),
                     ...{
-                        ...(globalUA && { 'user-agent': await this.getUserAgent() }), // Set globalUA intially
+                        // ...(globalUA && { 'user-agent': await this.getUserAgent() }), // Set globalUA intially
                         'referer': `${NHENTAI_URL}/`
                     }
                 }
