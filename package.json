@@ -21,11 +21,11 @@
   },
   "homepage": "https://github.com/Paperback-iOS/extensions-official#readme",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.25.0",
-    "@typescript-eslint/parser": "^4.25.0",
-    "eslint": "^7.27.0",
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "@typescript-eslint/parser": "^5.60.1",
+    "eslint": "^8.43.0",
     "eslint-plugin-modules-newline": "^0.0.6",
-    "typescript": "^4.8.4"
+    "typescript": "^5.1.5"
   },
   "dependencies": {
     "paperback-cli": "^1.4.0",
