@@ -2,15 +2,13 @@
 import {
     Button,
     NavigationButton,
-    RequestManager,
+    // RequestManager,
     SourceStateManager,
 } from 'paperback-extensions-common'
 import {
     NHLanguages,
     NHSortOrders,
 } from './NHentaiHelper'
-
-import rUserAgent from '../lib/rand-ua/index'
 
 export const getLanguages = async (stateManager: SourceStateManager): Promise<string[]> => {
     return (await stateManager.retrieve('languages') as string[]) ?? NHLanguages.getDefault()
@@ -24,7 +22,7 @@ export const getSortOrders = async (stateManager: SourceStateManager): Promise<s
     return (await stateManager.retrieve('sort_order') as string[]) ?? NHSortOrders.getDefault()
 }
 
-export const settings = (stateManager: SourceStateManager, requestManager: RequestManager, source: any): NavigationButton => {
+export const settings = (stateManager: SourceStateManager): NavigationButton => {
     return createNavigationButton({
         id: 'settings',
         value: '',
@@ -40,40 +38,6 @@ export const settings = (stateManager: SourceStateManager, requestManager: Reque
             validate: async () => true,
             sections: () => {
                 return Promise.resolve([
-                    createSection({
-                        id: 'ua_section',
-                        footer: 'If you\'re experiencing issues with CloudFlare, try randomizing your User Agent.\nPlease restart your app after doing so.\nNOTE! You might need to try this a couple of times for it to work!',
-                        rows: async () => [
-                            createLabel({
-                                id: 'current_ua',
-                                value: !source.userAgent ? 'Not allowed to change' :
-                                    (typeof source.userAgent == 'string') ? source.userAgent :
-                                        await stateManager.retrieve('userAgent') as string ?? 'Default',
-                                label: 'Current User Agent: '
-                            }),
-                            createButton({
-                                id: 'randomise_ua',
-                                label: 'Randomise UserAgent & Clear Cookies',
-                                value: undefined,
-                                onTap: async () => {
-                                    try {
-                                        // Clear Cookies
-                                        // @ts-ignore
-                                        requestManager.cookieStore.getAllCookies().forEach(x => { requestManager.cookieStore.removeCookie(x) })
-
-                                        // Use set UserAgent unless one is manually set in the source
-                                        if (typeof source.userAgent !== 'string') {
-                                            stateManager.store('userAgent', rUserAgent('desktop'))
-                                        }
-
-                                    } catch (error) {
-                                        console.log(error)
-                                    }
-                                }
-                            })
-                        ]
-                    }),
-                    
                     createSection({
                         id: 'content',
                         footer: 'Modify the nhentai experience to your liking.',

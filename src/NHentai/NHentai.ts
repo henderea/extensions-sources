@@ -34,7 +34,7 @@ const API = NHENTAI_URL + '/api'
 const method = 'GET'
 
 export const NHentaiInfo: SourceInfo = {
-    version: '3.2.9',
+    version: '3.3.0',
     name: 'nhentai',
     description: 'Extension which pulls 18+ content from nHentai. (Literally all of it. We know why you\'re here)',
     author: 'NotMarek',
@@ -70,10 +70,6 @@ const extraArgs = async (stateManager: SourceStateManager): Promise<string> => {
     return ` ${args}` 
 }
 
-const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 12_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15'
-
-let globalUA: string | null
-
 export class NHentai extends Source {
     readonly requestManager: RequestManager = createRequestManager({
         requestsPerSecond: 3,
@@ -84,7 +80,6 @@ export class NHentai extends Source {
                 request.headers = {
                     ...(request.headers ?? {}),
                     ...{
-                        // ...(globalUA && { 'user-agent': await this.getUserAgent() }), // Set globalUA intially
                         'referer': `${NHENTAI_URL}/`
                     }
                 }
@@ -96,26 +91,9 @@ export class NHentai extends Source {
                 return response
             }
         }
-    });
+    })
 
     stateManager = createSourceStateManager({})
-
-    userAgent: string | boolean = true
-
-    async getUserAgent(): Promise<any> {
-        const stateUA = await this.stateManager.retrieve('userAgent') as string
-
-        if (!this.userAgent) {
-            globalUA = null
-        } else if (typeof this.userAgent == 'string') {
-            globalUA = this.userAgent
-        } else if (stateUA) {
-            globalUA = stateUA
-        } else {
-            globalUA = null
-        }
-        return globalUA
-    }
 
 
     override getMangaShareUrl(mangaId: string): string {
@@ -123,16 +101,14 @@ export class NHentai extends Source {
     }
 
     override async getSourceMenu(): Promise<Section> {
-        const section = Promise.resolve(createSection({
+        return Promise.resolve(createSection({
             id: 'main',
             header: 'Source Settings',
             rows: () => Promise.resolve([
-                settings(this.stateManager, this.requestManager, this),
+                settings(this.stateManager),
                 resetSettings(this.stateManager),
             ])
         }))
-        await this.getUserAgent()
-        return section
     }
     async getMangaDetails(mangaId: string): Promise<Manga> {
         const request = createRequestObject({
@@ -257,7 +233,6 @@ export class NHentai extends Source {
             url: NHENTAI_URL,
             method: 'GET',
             headers: {
-                ...(globalUA && { 'user-agent': globalUA }),
                 'referer': `${NHENTAI_URL}.`
             }
         })
