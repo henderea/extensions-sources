@@ -2914,10 +2914,10 @@ queue-microtask@^1.2.2:
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
-rand-user-agent@^2.0.9:
-  version "2.0.9"
-  resolved "https://registry.yarnpkg.com/rand-user-agent/-/rand-user-agent-2.0.9.tgz#f4d57db1129e9e105736c7d71fb5a1d6246aa0ce"
-  integrity sha512-qZKbOUCi+dz1/MjTSkG0bBoxalRSWkkpVpwrmtjQxOeazl48scIqG9Yo6sYn7OEs/4CRED9LyVNTE0IiEzWRjQ==
+rand-user-agent@^2.0.19:
+  version "2.0.19"
+  resolved "https://registry.yarnpkg.com/rand-user-agent/-/rand-user-agent-2.0.19.tgz#f00ca73a2289ee19d19206366d2163acad3a6c88"
+  integrity sha512-k+aOfYkTXiHNhAGnFDhxullK2v5v1jg/r36D13PKoSdrNS9cl7WJehn/GQ5s4jwibSm8RnO9e9NMFygH92AiaQ==
 
 randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5:
   version "2.1.0"
