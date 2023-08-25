@@ -40,7 +40,9 @@ import {
     accountSettings,
     getAccessToken,
     authEndpointRequest,
-    saveAccessToken
+    saveAccessToken,
+    getCheckerUrl,
+    getCheckerUser
 } from './MangaDexSettings'
 import {
     requestMetadata,
@@ -71,7 +73,7 @@ export const MangaDexInfo: SourceInfo = {
     description: 'Extension that pulls manga from MangaDex',
     icon: 'icon.png',
     name: 'MangaDex',
-    version: '2.1.16',
+    version: '2.1.17',
     authorWebsite: 'https://github.com/nar1n',
     websiteBaseURL: MANGADEX_DOMAIN,
     contentRating: ContentRating.EVERYONE,
@@ -94,7 +96,7 @@ export class MangaDex extends Source {
     COVER_BASE_URL = COVER_BASE_URL
 
     requestManager = createRequestManager({
-        requestsPerSecond: 4,
+        requestsPerSecond: 5,
         requestTimeout: 15000,
         interceptor: {
             interceptRequest: async (request) => {
@@ -127,6 +129,27 @@ export class MangaDex extends Source {
                 request.headers = {
                     ...request.headers,
                     authorization: 'Bearer ' + accessToken.accessToken
+                }
+
+                return request
+            },
+            interceptResponse: async (x) => x
+        }
+    })
+
+    checkerRequestManager = createRequestManager({
+        requestsPerSecond: 20,
+        requestTimeout: 15000,
+        interceptor: {
+            interceptRequest: async (request) => {
+                const checkerUser = await getCheckerUser(this.stateManager)
+
+                if(!checkerUser || checkerUser.length <= 0) return request
+
+                // Impossible to have undefined headers, ensured by the app
+                request.headers = {
+                    ...request.headers,
+                    'user-id': checkerUser
                 }
 
                 return request
@@ -309,12 +332,37 @@ export class MangaDex extends Source {
         })
     }
 
+    async tryChecker(mangaId: string): Promise<void> {
+        const checkerUrl = await getCheckerUrl(this.stateManager)
+        if(!checkerUrl) return
+        const epochKey = `${mangaId}-check-epoch`
+        const lastCheckEpoch = (await this.stateManager.retrieve(epochKey) as number) ?? 0
+        const request = createRequestObject({
+            url: `${checkerUrl}?mangaId=${mangaId}&lastCheckEpoch=${lastCheckEpoch}`,
+            method: 'GET'
+        })
+        const response = await this.checkerRequestManager.schedule(request, 1)
+        const json = (typeof response.data) === 'string' ? JSON.parse(response.data) : response.data
+        if(!json.state) return
+        if(json.state == 'error') {
+            console.log(`Encountered error fetching ${mangaId}`)
+            return
+        } else if(json.state == 'no-user') {
+            console.log('Invalid user set')
+            return
+        }
+        await this.stateManager.store(epochKey, json.epoch)
+        if(json.state == 'current') throw new Error('Already up to date')
+    }
+
     async getChapters(mangaId: string): Promise<Chapter[]> {
         if (!mangaId.includes('-')) {
             // Legacy Id
             console.log('OLD ID: PLEASE MIGRATE')
             throw new Error('OLD ID: PLEASE MIGRATE')
         }
+
+        await this.tryChecker(mangaId)
 
         const languages: string[] = await getLanguages(this.stateManager)
         const skipSameChapter = await getSkipSameChapter(this.stateManager)

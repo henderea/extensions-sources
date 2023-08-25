@@ -37,6 +37,22 @@ export const getDaysToLookBack = async (stateManager: SourceStateManager): Promi
     return Math.max(parseFloat((await stateManager.retrieve('days_to_look_back') as string) ?? '0'), 0)
 }
 
+const getCheckerBaseUrl = async (stateManager: SourceStateManager): Promise<string> => {
+    return (await stateManager.retrieve('checker_base_url') as string) ?? ''
+}
+
+export const getCheckerUrl = async (stateManager: SourceStateManager): Promise<string | null> => {
+    const baseUrl = await getCheckerBaseUrl(stateManager)
+    if(baseUrl && baseUrl.length > 0) {
+        return `${baseUrl}/manga-check`
+    }
+    return null
+}
+
+export const getCheckerUser = async (stateManager: SourceStateManager): Promise<string> => {
+    return (await stateManager.retrieve('checker_user') as string) ?? ''
+}
+
 export const contentSettings = (stateManager: SourceStateManager): NavigationButton => {
     return createNavigationButton({
         id: 'content_settings',
@@ -49,7 +65,9 @@ export const contentSettings = (stateManager: SourceStateManager): NavigationBut
                     stateManager.store('ratings', values.ratings),
                     stateManager.store('data_saver', values.data_saver),
                     stateManager.store('skip_same_chapter', values.skip_same_chapter),
-                    stateManager.store('days_to_look_back', values.days_to_look_back)
+                    stateManager.store('days_to_look_back', values.days_to_look_back),
+                    stateManager.store('checker_base_url', (values.checker_base_url ?? '').replace(/[/]$/, '')),
+                    stateManager.store('checker_user', values.checker_user)
                 ]).then()
             },
             validate: () => {
@@ -66,7 +84,9 @@ export const contentSettings = (stateManager: SourceStateManager): NavigationBut
                                 getRatings(stateManager),
                                 getDataSaver(stateManager),
                                 getSkipSameChapter(stateManager),
-                                getDaysToLookBack(stateManager)
+                                getDaysToLookBack(stateManager),
+                                getCheckerBaseUrl(stateManager),
+                                getCheckerUser(stateManager)
                             ]).then(async values => {
                                 return [
                                     createSelect({
@@ -91,6 +111,18 @@ export const contentSettings = (stateManager: SourceStateManager): NavigationBut
                                         id: 'days_to_look_back',
                                         placeholder: 'Days to look back during update',
                                         value: values[4] + '',
+                                        maskInput: false
+                                    }),
+                                    createInputField({
+                                        id: 'checker_base_url',
+                                        placeholder: 'paperback-mdchecker base url',
+                                        value: values[5] + '',
+                                        maskInput: false
+                                    }),
+                                    createInputField({
+                                        id: 'checker_user',
+                                        placeholder: 'paperback-mdchecker username',
+                                        value: values[6] + '',
                                         maskInput: false
                                     }),
                                     createSwitch({
@@ -416,7 +448,9 @@ export const resetSettings = (stateManager: SourceStateManager): Button => {
                 stateManager.store('recommendedIds', null),
                 stateManager.store('enabled_homepage_sections', null),
                 stateManager.store('enabled_recommendations', null),
-                stateManager.store('amount_of_recommendations', null)
+                stateManager.store('amount_of_recommendations', null),
+                stateManager.store('checker_base_url', null),
+                stateManager.store('checker_user', null)
             ]).then()
         }
     })
